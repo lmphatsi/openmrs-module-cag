@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
+                  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+ 
+    <!--
+    	See http://wiki.openmrs.org/display/docs/Module+liquibase+File for 
+    	documentation on this file.
+    
+        See http://www.liquibase.org/manual/home#available_database_refactorings
+        for a list of supported elements and attributes
+    -->
+ 
+ 	<!-- Uncomment the changeset below if you want to make the Item class persistable, see also Item and CagDaoTest -->
+ 	<!--
+	<changeSet id="cag-2016-08-02-12-21" author="raff">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="cag_item"/></not>
+		</preConditions>
+		<comment>
+			Creating the cag_item table
+		</comment>
+		<createTable tableName="cag_item">
+			<column name="cag_item_id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"></constraints>
+			</column>
+			<column name="owner" type="int" />
+			<column name="description" type="varchar(255)" />
+		</createTable>
+        <addForeignKeyConstraint constraintName="cag_item_owner_fk" baseTableName="cag_item" baseColumnNames="owner"  referencedTableName="users"
+                                 referencedColumnNames="user_id" />
+    </changeSet> -->
+	<changeSet id="create table: cag-table - 2023-08-13" author="lebajoa" dbms="mysql">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="cag_cag"/></not>
+		</preConditions>
+		<comment>
+			Creating the cag_cag table
+		</comment>
+		<createTable tableName="cag_cag">
+			<column name="cag_id" type="int" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false"/>
+			</column>
+			<column name="name" type="varchar(255)" />
+			<column name="description" type="varchar(255)" />
+			<column name="village" type="varchar(255)" />
+			<column name="constituency" type="varchar(255)" />
+			<column name="district" type="varchar(255)" />
+			<column name="creator" type="int" />
+			<column name="date_created" type="datetime" />
+			<column name="date_changed" type="datetime" />
+			<column name="changed_by" type="int" />
+			<column defaultValueBoolean="false" name="voided" type="BOOLEAN"/>
+			<column name="voided_by" type="int" />
+			<column name="date_voided" type="datetime" />
+			<column name="void_reason" type="varchar(255)" />
+			<column name="uuid" type="char(38)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+		</createTable>
+		<addForeignKeyConstraint constraintName="cag_created_by_fk" baseTableName="cag_cag" baseColumnNames="creator"  referencedTableName="users"
+								 referencedColumnNames="user_id" />
+		<addForeignKeyConstraint constraintName="cag_changed_by_fk" baseTableName="cag_cag" baseColumnNames="changed_by"  referencedTableName="users"
+								 referencedColumnNames="user_id" />
+		<addForeignKeyConstraint constraintName="cag_voided_by_fk" baseTableName="cag_cag" baseColumnNames="voided_by"  referencedTableName="users"
+								 referencedColumnNames="user_id" />
+	</changeSet>
+
+	<changeSet id="create table: cag-patient (member) - 2023-07-15" author="lebajoa" dbms="mysql">
+		<preConditions onFail="MARK_RAN">
+			<not><tableExists tableName="cag_patient"/></not>
+			<tableExists tableName="cag_cag"/>
+			<tableExists tableName="patient"/>
+		</preConditions>
+		<comment>
+			Creating the cag_patient table (join table)
+		</comment>
+		<createTable tableName="cag_patient">
+			<column name="cag_id" type="int">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="patient_id" type="int">
+				<constraints primaryKey="true"/>
+			</column>
+		</createTable>
+		<addForeignKeyConstraint constraintName="cag_patient_cag_id_fk" 
+								 baseTableName="cag_patient" 
+								 baseColumnNames="cag_id"  
+								 referencedTableName="cag_cag"
+								 referencedColumnNames="cag_id" />
+		<addForeignKeyConstraint constraintName="cag_patient_patient_id_fk" 
+								 baseTableName="cag_patient" 
+								 baseColumnNames="patient_id"  
+								 referencedTableName="patient"
+								 referencedColumnNames="patient_id" />
+	</changeSet>
+ 
+</databaseChangeLog>
